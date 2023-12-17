@@ -115,10 +115,67 @@ def get_commands_count():
 
 
 
+
 # have to define here for embed reasons
 
 TOKEN, PREFIX, APIIPKEY = load_settings()
 AUTHOR, IMAGE, COLOR = load_theme()
+
+
+def get_badges(id):
+    url = f"https://discord.com/api/v9/users/{id}/profile"
+
+    r = requests.get(url, headers={'authorization' : TOKEN})
+    class Color:
+        # ANSI escape code colors
+        RESET = '\033[0m'
+        RED = '\033[91m'
+        GREEN = '\033[92m'
+        YELLOW = '\033[93m'
+        BLUE = '\033[94m'
+        PURPLE = '\033[95m'
+        CYAN = '\033[96m'
+
+    badgedata = {
+        'hypesquad_house_1': f'{Color.GREEN}H1{Color.RESET}',
+        'hypesquad_house_2': f'{Color.GREEN}H2{Color.RESET}',
+        'hypesquad_house_3': f'{Color.GREEN}H3{Color.RESET}',
+        'premium': f'{Color.YELLOW}N{Color.RESET}',
+        'legacy_username': f'{Color.CYAN}LU{Color.RESET}',
+        'staff': f'{Color.BLUE}ST{Color.RESET}',
+        'partner': f'{Color.BLUE}PT{Color.RESET}',
+        'hypesquad': f'{Color.BLUE}HS{Color.RESET}',
+        'bug_hunter': f'{Color.PURPLE}BH{Color.RESET}',
+        'early_supporter': f'{Color.PURPLE}ES{Color.RESET}',
+        'verified_bot_developer': f'{Color.PURPLE}VD{Color.RESET}',
+        'bot': f'{Color.YELLOW}BT{Color.RESET}',
+        'verified': f'{Color.CYAN}VR{Color.RESET}',
+        'support': f'{Color.CYAN}SP{Color.RESET}',
+        'events': f'{Color.CYAN}EV{Color.RESET}',
+        'verified_developer': f'{Color.CYAN}VD{Color.RESET}',
+        'partner_events': f'{Color.CYAN}PE{Color.RESET}',
+        'system': f'{Color.CYAN}SY{Color.RESET}',
+        'bug_hunter_level_2': f'{Color.CYAN}BH2{Color.RESET}',
+        'early_verified_bot_developer': f'{Color.CYAN}EVD{Color.RESET}',
+        'verified_bot': f'{Color.CYAN}VBT{Color.RESET}',
+        'hypesquad_bravery': f'{Color.CYAN}HB{Color.RESET}',
+        'hypesquad_brilliance': f'{Color.CYAN}HB{Color.RESET}',
+        'hypesquad_balance': f'{Color.CYAN}HB{Color.RESET}',
+        # Add more badges and their colors here
+    }
+
+
+
+    data = r.json()
+    user_badges = data.get('badges') 
+
+    user_badge_string = ""
+    for badge in user_badges:
+        name = badge.get('id')
+        user_badge_string += f"{badgedata.get(name, 'Unknown')}/"  
+    return user_badge_string
+
+
 
 
 def make_embed(content, title, section, image=None):
@@ -193,10 +250,12 @@ async def on_ready():
     title(f"Server count: {len(bot.guilds) - 2}")
     cform = getfriends()
     cmdcount = get_commands_count()
+    badges = get_badges(bot.user.id)
     print(Colorate.Vertical(Colors.blue_to_purple, Center.XCenter(ASCII_ART)))
     print()
     print(f"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > Username: {bot.user.name}")
     print(f"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > Friend count: {cform}")
+    print(f"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > Badges: {badges}")
     print(f"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > Loaded {cmdcount} commands")
     print(f"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > Run {PREFIX}HELP for help")
 
