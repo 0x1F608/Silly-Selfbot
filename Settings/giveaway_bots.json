@@ -1,0 +1,17 @@
+{
+    "GiveawayBot" : {
+        "name" : "GiveawayBot",
+        "discrim" : "2381",
+        "Application_ID" : "294882584201003009",
+        "React-Mode" : {
+            "Type" : "2",
+            "button_data" : {
+                "component_type" : 2,
+                "custom_id" : "enter-giveaway"
+            },
+            "emoji_data" : {
+                "emoji" : ""
+            }   
+        }
+    }
+}

@@ -46,6 +46,25 @@ def load_theme():
         COLOR = settings.get('COLOR')
         return AUTHOR, IMAGE, COLOR
 
+info = []
+
+def load_give_bots():
+    with open('Settings/giveaway_bots.json') as f:
+        data = json.load(f)
+        info.append(data) 
+
+
+load_give_bots()
+
+bot_names = []
+
+def decode_bots():
+    for bot_info in info:
+        for bot_key, bot_data in bot_info.items():
+            dataa = bot_data.get('name')
+            bot_names.append(dataa)
+decode_bots()
+
 
 scripts = []
 def load_scripts():
@@ -212,26 +231,36 @@ async def on_message(message: discord.Message):
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} User: {message.author} | {message.author.id}
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Channel: {message.guild} | {message.channel}""")
     
-    elif message.author.name == "GiveawayBot" and message.author.discriminator == "2381":
-        start_time = datetime.now()
-        url = "https://discord.com/api/v9/interactions"
-        data = {
-            "type": 3,
-            "guild_id": str(message.guild.id),
-            "channel_id": str(message.channel.id),
-            "message_id": str(message.id),
-            "application_id": "294882584201003009",
-            "session_id": bot.http.token,
-            "data": {
-                "component_type": 2,
-                "custom_id": "enter-giveaway"
-            }   
-        }
-        r = requests.post(url, headers=global_headers, json=data)
-        if r.status_code == 204:
-            taken_time = datetime.now() - start_time
-            print(f"""\n{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Joined giveaway
+    elif message.author.name in bot_names:
+        with open('Settings/giveaway_bots.json') as f:
+            configdata = json.load(f)
+            application_id = configdata[message.author.name]['Application_ID']
+            component_type = configdata[message.author.name]['React-Mode']['button_data']['component_type']
+            custom_id = configdata[message.author.name]['React-Mode']['button_data']['custom_id']
+            emoji = configdata[message.author.name]['React-Mode']['emoji_data']['emoji']
+            mode = configdata[message.author.name]['React-Mode']['Type']
+        if mode == "2":
+            start_time = datetime.now()
+            url = "https://discord.com/api/v9/interactions"
+            data = {
+                "type": 3,
+                "guild_id": str(message.guild.id),
+                "channel_id": str(message.channel.id),
+                "message_id": str(message.id),
+                "application_id": int(application_id),
+                "session_id": bot.http.token,
+                "data": {
+                    "component_type": int(component_type),
+                    "custom_id": str(custom_id)
+                }   
+            }
+            r = requests.post(url, headers=global_headers, json=data)
+            if r.status_code == 204:
+                taken_time = datetime.now() - start_time
+                print(f"""\n{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Joined giveaway
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} User: {message.author} | {message.author.id}
+{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Application ID: {application_id}
+{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Button data: {component_type} | {custom_id}
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Channel: {message.guild} | {message.channel}
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Successfully joined in {taken_time}""")
 
@@ -1159,10 +1188,12 @@ async def swat(ctx, phone: int, targ: discord.User, addy: str):
 @bot.command()
 async def ghostspam(ctx, count: int, user: discord.User):
     await ctx.message.delete()
-    for i in range(count):
+    async def send():
         message = await ctx.send(f"<@{user.id}>")
         await message.delete()
         time.sleep(1)
+    for i in range(count):
+        await send()
 # >----------------<
 #  Account commands
 # >----------------<
