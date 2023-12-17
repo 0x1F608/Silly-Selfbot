@@ -1,0 +1,20 @@
+<=|==V0.1==|=>
+- 47 Commands
+- Implemented Raid features
+- Implemented Recon features
+- Implemented Cracking features
+- Implemented Utilities features
+- Implemented Fun features
+- Implemented Troll features
+- Implemented Account features
+- Implemented Nitro sniper
+- Implemented Giveaway joiner
+- Implemented Ghost ping detector
+- Implemented Api raid commands
+
+<=|==V0.2==|=>
+- Added VC joiner
+- Added clear
+- Added portscan
+- Added restart
+- Added Iplookup
