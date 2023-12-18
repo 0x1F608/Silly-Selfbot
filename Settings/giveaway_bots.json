@@ -11,7 +11,24 @@
             },
             "emoji_data" : {
                 "emoji" : ""
-            }   
-        }
+            }
+        },
+        "Win-Data" : "Congratulations"
+    },
+    "Carl-bot" : {
+        "name" : "Carl-bot",
+        "discrim" : "1536",
+        "Application_ID" : "235148962103951360",
+        "React-Mode" : {
+            "Type" : "2",
+            "button_data" : {
+                "component_type" : 2,
+                "custom_id" : "giveaway"
+            },
+            "emoji_data" : {
+                "emoji" : ""
+            }
+        },
+        "Win-Data" : "Congratulations"
     }
 }

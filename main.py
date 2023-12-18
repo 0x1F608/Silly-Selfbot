@@ -298,28 +298,34 @@ async def on_message(message: discord.Message):
             custom_id = configdata[message.author.name]['React-Mode']['button_data']['custom_id']
             emoji = configdata[message.author.name]['React-Mode']['emoji_data']['emoji']
             mode = configdata[message.author.name]['React-Mode']['Type']
-        if mode == "2":
-            start_time = datetime.now()
-            url = "https://discord.com/api/v9/interactions"
-            data = {
-                "type": 3,
-                "guild_id": str(message.guild.id),
-                "channel_id": str(message.channel.id),
-                "message_id": str(message.id),
-                "application_id": int(application_id),
-                "session_id": bot.http.token,
-                "data": {
-                    "component_type": int(component_type),
-                    "custom_id": str(custom_id)
-                }   
-            }
-            r = requests.post(url, headers=global_headers, json=data)
-            if r.status_code == 204:
-                taken_time = datetime.now() - start_time
-                print(f"""\n{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Joined giveaway
-{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} User: {message.author} | {message.author.id}
-{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Application ID: {application_id}
-{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Button data: {component_type} | {custom_id}
+            winmessage = configdata[message.author.name]['Win-Data']
+        if winmessage in message.content:
+            if bot.user.mentioned_in(message):
+                print(f"""\n{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Giveaway Won
+{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Bot: {message.author} | {application_id}
+{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Channel: {message.guild} | {message.channel}
+{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Successfully won at: {message.created_at.strftime('%H:%M')}""")
+        else:
+            if mode == "2":
+                start_time = datetime.now()
+                url = "https://discord.com/api/v9/interactions"
+                data = {
+                    "type": 3,
+                    "guild_id": str(message.guild.id),
+                    "channel_id": str(message.channel.id),
+                    "message_id": str(message.id),
+                    "application_id": int(application_id),
+                    "session_id": bot.http.token,
+                    "data": {
+                        "component_type": int(component_type),
+                        "custom_id": str(custom_id)
+                    }   
+                }
+                r = requests.post(url, headers=global_headers, json=data)
+                if r.status_code == 204:
+                    taken_time = datetime.now() - start_time
+                    print(f"""\n{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Giveaway detected
+{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Bot: {message.author} | {application_id}
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Channel: {message.guild} | {message.channel}
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Successfully joined in {taken_time}""")
 
