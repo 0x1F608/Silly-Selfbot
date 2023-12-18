@@ -18,6 +18,7 @@ from datetime import datetime
 from colorama import Fore
 from pystyle import Colorate, Colors, Center, Box
 from discord.ext import commands
+from cryptography.fernet import Fernet
 
 # Define key functions
 
@@ -27,6 +28,23 @@ def clears():
 def title(args=None):
     os.system("title Silly Selfbot") if args == None else os.system(f"title Silly Selfbot [~] {args}")
 
+
+
+def make_config():
+    with open('Settings/config.json', 'w') as f:
+        token = str(input(F"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > Token: "))
+        prefix = str(input(F"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > Prefix: "))
+        ipkey = str(input(F"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > Api key [if you are unsure press enter]: "))
+        data = {}
+        data = ({
+            "TOKEN" : token,
+            "PREFIX" : prefix,
+            "IPLOOKUP-API-KEY" : ipkey
+        })
+        json.dump(data, f)
+
+
+make_config()
 
 
 
@@ -112,6 +130,46 @@ def get_commands_count():
                     if "ctx" in line:
                         commandscount += 1
     return commandscount
+
+
+def givejoiner(message):
+    with open('Settings/giveaway_bots.json') as f:
+        configdata = json.load(f)
+        application_id = configdata[message.author.name]['Application_ID']
+        component_type = configdata[message.author.name]['React-Mode']['button_data']['component_type']
+        custom_id = configdata[message.author.name]['React-Mode']['button_data']['custom_id']
+        emoji = configdata[message.author.name]['React-Mode']['emoji_data']['emoji']
+        mode = configdata[message.author.name]['React-Mode']['Type']
+        winmessage = configdata[message.author.name]['Win-Data']
+    if winmessage in message.content:
+        if bot.user.mentioned_in(message):
+            print(f"""\n{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Giveaway Won
+{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Bot: {message.author} | {application_id}
+{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Channel: {message.guild} | {message.channel}
+{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Successfully won at: {message.created_at.strftime('%H:%M')}""")
+    else:
+        if mode == "2":
+            start_time = datetime.now()
+            url = "https://discord.com/api/v9/interactions"
+            data = {
+                "type": 3,
+                "guild_id": str(message.guild.id),
+                "channel_id": str(message.channel.id),
+                "message_id": str(message.id),
+                "application_id": int(application_id),
+                "session_id": bot.http.token,
+                "data": {
+                    "component_type": int(component_type),
+                    "custom_id": str(custom_id)
+                }   
+            }
+            r = requests.post(url, headers=global_headers, json=data)
+            if r.status_code == 204:
+                taken_time = datetime.now() - start_time
+                print(f"""\n{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Giveaway detected
+{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Bot: {message.author} | {application_id}
+{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Channel: {message.guild} | {message.channel}
+{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Successfully joined in {taken_time}""")
 
 
 
@@ -291,43 +349,7 @@ async def on_message(message: discord.Message):
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Channel: {message.guild} | {message.channel}""")
     
     elif message.author.name in bot_names:
-        with open('Settings/giveaway_bots.json') as f:
-            configdata = json.load(f)
-            application_id = configdata[message.author.name]['Application_ID']
-            component_type = configdata[message.author.name]['React-Mode']['button_data']['component_type']
-            custom_id = configdata[message.author.name]['React-Mode']['button_data']['custom_id']
-            emoji = configdata[message.author.name]['React-Mode']['emoji_data']['emoji']
-            mode = configdata[message.author.name]['React-Mode']['Type']
-            winmessage = configdata[message.author.name]['Win-Data']
-        if winmessage in message.content:
-            if bot.user.mentioned_in(message):
-                print(f"""\n{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Giveaway Won
-{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Bot: {message.author} | {application_id}
-{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Channel: {message.guild} | {message.channel}
-{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Successfully won at: {message.created_at.strftime('%H:%M')}""")
-        else:
-            if mode == "2":
-                start_time = datetime.now()
-                url = "https://discord.com/api/v9/interactions"
-                data = {
-                    "type": 3,
-                    "guild_id": str(message.guild.id),
-                    "channel_id": str(message.channel.id),
-                    "message_id": str(message.id),
-                    "application_id": int(application_id),
-                    "session_id": bot.http.token,
-                    "data": {
-                        "component_type": int(component_type),
-                        "custom_id": str(custom_id)
-                    }   
-                }
-                r = requests.post(url, headers=global_headers, json=data)
-                if r.status_code == 204:
-                    taken_time = datetime.now() - start_time
-                    print(f"""\n{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Giveaway detected
-{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Bot: {message.author} | {application_id}
-{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Channel: {message.guild} | {message.channel}
-{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Successfully joined in {taken_time}""")
+        givejoiner(message)
 
     else:
         await bot.process_commands(message)
