@@ -18,7 +18,6 @@ from datetime import datetime
 from colorama import Fore
 from pystyle import Colorate, Colors, Center, Box
 from discord.ext import commands
-from cryptography.fernet import Fernet
 
 # Define key functions
 
@@ -30,7 +29,7 @@ def title(args=None):
 
 
 
-def make_config():
+def make_config(error):
     with open('Settings/config.json', 'w') as f:
         token = str(input(F"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > Token: "))
         prefix = str(input(F"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > Prefix: "))
@@ -44,7 +43,7 @@ def make_config():
         json.dump(data, f)
 
 
-make_config()
+
 
 
 
