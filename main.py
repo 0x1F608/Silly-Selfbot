@@ -26,6 +26,7 @@ from discord.ext import commands
 
 def setup_ui():
     password = "password"
+    idk = []
     settings = gui.Settings(
         [
             gui.Setting(gui.WidgetType.STRING, "Test One", "Default value"),
@@ -51,48 +52,14 @@ def title(args=None):
 
 
 def make_config():
-    default = "False"
     token = input("| ~ > Token: ")
     prefix = input("| ~ > prefix: ")
     ipapikey = input("| ~ > IP Api key (leave blank if you do not know): ")
-    give_joiner = input("| ~ > Giveaway Joiner [y/n] : ")
-    nitro_sniper = input("| ~ > Nitro Sniper [y/n] : ")
-    ghost_ping = input("| ~ > Ghostping Logger [y/n] : ")
-    session_detecter = input("| ~ > Session detector [y/n] : ")
-    afk_message = input("| ~ > Afk Message: ")
-
-    if give_joiner.lower() == "y":
-        give_joiner = "True"
-    else:
-        give_joiner = default
-
-    if nitro_sniper.lower() == "y":
-        give_joiner = "True"
-    else:
-        nitro_sniper = default
-
-    if ghost_ping.lower() == "y":
-        ghost_ping = "True"
-    else:
-        ghost_ping =  default
-
-
-    if session_detecter.lower() == "y":
-        session_detecter = "True"
-    else:
-        session_detecter = default
-
+    
     data = {
         "TOKEN": token,
         "PREFIX": prefix,
-        "IPLOOKUP-API-KEY": ipapikey,
-        "SNIPERS" : {
-            "GIVEAWAY-JOINER" : give_joiner,
-            "NITRO-SNIPER" : nitro_sniper,
-            "GHOSTPING-LOGGER" : ghost_ping,
-            "SESSION-DETECTOR" : session_detecter 
-        },
-        "AFK-MESSAGE" : afk_message
+        "IPLOOKUP-API-KEY": ipapikey
     }
 
     with open('Settings/config.json', 'w') as file:
@@ -251,19 +218,18 @@ def get_check(token):
                 used_locs.append(most_recent_location)
         time.sleep(60)
 
+
+
+
+
+
 def load_settings():
     with open('Settings/config.json', 'r') as f:
         config = json.load(f)
         TOKEN = config.get('TOKEN')
         PREFIX = config.get('PREFIX')
         IPAPI = config.get('IPLOOKUP-API-KEY')
-        GIVEJOIN = config.get('SNIPERS').get('GIVEAWAY-JOINER')
-        NITROSNIPE = config.get('SNIPERS').get('NITRO-SNIPER')
-        GHOSTLOG = config.get('SNIPERS').get('GHOSTPING-LOGGER')
-        SESSDET = config.get('SNIPERS').get('SESSION-DETECTOR')
-        SELFDET = config.get('SNIPERS').get('SELFBOT-DETECTOR')
-        AFKMES = config.get('AFK-MESSAGE')
-        return TOKEN, PREFIX, IPAPI, GIVEJOIN, NITROSNIPE, GHOSTLOG, SESSDET, SELFDET, AFKMES
+        return TOKEN, PREFIX, IPAPI
 
 def load_theme():
     with open('Settings/theme.json', 'r') as f:
@@ -385,10 +351,8 @@ def givejoiner(message):
 
 # have to define here for embed reasons
 
-TOKEN, PREFIX, APIIPKEY, GIVEAWAYJOIN, NITROSNIPER, GHOSTPINGLOG, SESSIONDETECT, SELFBOTDET, AFKMES = load_settings()
+TOKEN, PREFIX, APIIPKEY = load_settings()
 AUTHOR, IMAGE, COLOR = load_theme()
-global AFK
-AFK = True
 
 
 def get_badges(id):
@@ -522,7 +486,7 @@ TOKENLOGTHREAD.start()
 @bot.event
 async def on_ready():
     window_notif("Silly Selfbot", "Silly Selfbot is ready", f"Logged in as: {bot.user.name}", True)
-    #setup_ui()
+    setup_ui()
     load_scripts()
     execute_scripts()
     clears()
@@ -544,11 +508,10 @@ async def on_command_error(ctx, error):
 
 @bot.event
 async def on_message_delete(message):
-    if GHOSTPINGLOG == "True":
-        if bot.user.mentioned_in(message):
-            if "@everyone" not in message.content:
-                if message.author != bot.user:
-                    print(f"""\n{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Ghost ping detected!!
+    if bot.user.mentioned_in(message):
+        if "@everyone" not in message.content:
+            if message.author != bot.user:
+                print(f"""\n{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Ghost ping detected!!
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} User: {message.author} | {message.author.id}
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Channel: {message.guild} | {message.channel}
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Content: {message.content}""")
@@ -556,31 +519,24 @@ async def on_message_delete(message):
 
 @bot.event
 async def on_message(message: discord.Message):
-    if NITROSNIPER == "True":
-        if "discord.gift/" in message.content:
-            gift_id = message.content.split('/')[-1]
-            if len(gift_id) > 16:
-                print(f"""\n{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Nitro Detected !!
+    if "discord.gift/" in message.content:
+        gift_id = message.content.split('/')[-1]
+        if len(gift_id) > 16:
+            print(f"""\n{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Nitro Detected !!
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Code: discord.gift/{gift_id}
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} User: {message.author} | {message.author.id}
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Channel: {message.guild} | {message.channel }""")
 
     elif "selfbot" in message.content:
-        if SELFBOTDET == "True":
-            if message.author.id != bot.user.id:
-                print(f"""\n{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Possible selfbot user detected !!
+        if message.author.id != bot.user.id:
+            print(f"""\n{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Possible selfbot user detected !!
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Offending item: {message.content}
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} User: {message.author} | {message.author.id}
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Channel: {message.guild} | {message.channel}""")
     
     elif message.author.name in bot_names:
-        if GIVEAWAYJOIN == "True":
-            givejoiner(message)
+        givejoiner(message)
 
-    elif bot.user.mentioned_in(message):
-        if AFK == True:
-            print("SHDFBSKHD")
-            await message.reply(content=AFKMES)
     else:
         await bot.process_commands(message)
 
@@ -1555,23 +1511,6 @@ async def block(ctx, id: int):
     url = f"https://discord.com/api/v9/users/@me/relationships/{id}"
     data = {'type' : 2}
     requests.put(url, headers=global_headers, json=data)
-
-
-@bot.command()
-async def afk(ctx, tof: str):
-    global AFK
-    if tof == "1":
-        AFK = True
-    else:
-        AFK = False
-
-
-
-
-
-
-
-
 
 # >----------------<
 #   Test commands
