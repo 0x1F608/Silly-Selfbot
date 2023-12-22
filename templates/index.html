@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{sbname}} - Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <script src="{{ url_for('static', filename='index.js') }}" defer></script>
+  </head>
+  <body>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/settings">Settings</a>
+        <a href="/functions">Functions</a>
+      </nav>
+    {% if validpass %}
+          <h1>Welcome to {{ sbname }}, {{name}}</h1>
+    <p>Friends: {{ friends }}</p>
+    <p>Guilds: {{ servers }}</p>
+    {% if motd %}
+    <p>Motd: {{ motd }}</p>
+    {% endif %}
+    {% else %}
+    <h1>You aren't logged in</h1>
+      <label for="panelpassword">Enter your panel password to continue</label>
+      <div>
+        <input type="password" required class="passwordInput" id="pass" />
+        <button onclick="validate()" type="submit"">Log in</button>
+      </div>
+    {%endif%}
+  </body>
+</html>
