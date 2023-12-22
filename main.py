@@ -21,6 +21,9 @@ from discord.ext import commands
 
 # Define key functions
 
+
+
+
 def clears():
     os.system("cls") if os.name == "nt" else os.system("clear")
 
@@ -41,6 +44,69 @@ def make_config(error):
             "IPLOOKUP-API-KEY" : ipkey
         })
         json.dump(data, f)
+
+
+whitelisted_locations = []
+
+def get_current_session(token):
+    sessions = []
+    url = "https://discord.com/api/v9/auth/sessions"
+    headers = {
+        'authorization': token,
+        'X-Super-Properties': 'eyJvcyI6IldpbmRvd3MiLCJicm93c2VyIjoiRmlyZWZveCIsImRldmljZSI6IiIsInN5c3RlbV9sb2NhbGUiOiJlbi1VUyIsImJyb3dzZXJfdXNlcl9hZ2VudCI6Ik1vemlsbGEvNS4wKChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQ7IHJ2OjEwOS4wKSkvNTIuMC4wIiwiYnJvd3Nlcl92ZXJzaW9uIjoiMTE2LjAiLCJvc192ZXJzaW9uIjoiMTAiLCJyZWZlcnJlciI6IiIsInJlZmVycmluZ19kb21haW4iOiIiLCJyZWZlcnJlcl9jdXJyZW50IjoiaHR0cHM6Ly9kaXNjb3JkLmNvbS8iLCJyZWZlcnJpbmdfZG9tYWluX2N1cnJlbnQiOiJkaXNjb3JkLmNvbSIsInJlbGVhc2VfY2hhbm5lbCI6InN0YWJsZSIsImNsaWVudF9idWlsZF9udW1iZXIiOjIyOTUyNywiY2xpZW50X2V2ZW50X3NvdXJjZSI6bnVsbH0='
+    }
+
+    r = requests.get(url, headers=headers)
+    decode = r.json()
+    for info in decode['user_sessions']:
+        session_info = {
+            'location': info['client_info']['location'],
+            'last_used': info['approx_last_used_time'],
+            'id_hash': info['id_hash']
+        }
+        sessions.append(session_info)
+
+    most_recent_session = max(sessions, key=lambda x: x['last_used'])
+    most_recent_location = most_recent_session['location']
+    whitelisted_locations.append(most_recent_location)
+
+used_locs = []
+
+
+def get_check(token):
+    while True:
+        sessions = []
+        url = "https://discord.com/api/v9/auth/sessions"
+        headers = {
+            'authorization': token,
+            'X-Super-Properties': 'eyJvcyI6IldpbmRvd3MiLCJicm93c2VyIjoiRmlyZWZveCIsImRldmljZSI6IiIsInN5c3RlbV9sb2NhbGUiOiJlbi1VUyIsImJyb3dzZXJfdXNlcl9hZ2VudCI6Ik1vemlsbGEvNS4wKChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQ7IHJ2OjEwOS4wKSkvNTIuMC4wIiwiYnJvd3Nlcl92ZXJzaW9uIjoiMTE2LjAiLCJvc192ZXJzaW9uIjoiMTAiLCJyZWZlcnJlciI6IiIsInJlZmVycmluZ19kb21haW4iOiIiLCJyZWZlcnJlcl9jdXJyZW50IjoiaHR0cHM6Ly9kaXNjb3JkLmNvbS8iLCJyZWZlcnJpbmdfZG9tYWluX2N1cnJlbnQiOiJkaXNjb3JkLmNvbSIsInJlbGVhc2VfY2hhbm5lbCI6InN0YWJsZSIsImNsaWVudF9idWlsZF9udW1iZXIiOjIyOTUyNywiY2xpZW50X2V2ZW50X3NvdXJjZSI6bnVsbH0='
+        }
+
+        r = requests.get(url, headers=headers)
+        decode = r.json()
+        for info in decode['user_sessions']:
+            session_info = {
+                'location': info['client_info']['location'],
+                'last_used': info['approx_last_used_time'],
+                'id_hash': info['id_hash'],
+                'platform': info['client_info']['os']
+            }
+            sessions.append(session_info)
+
+        most_recent_session = max(sessions, key=lambda x: x['last_used'])
+        most_recent_location = most_recent_session['location']
+        most_recent_hash = most_recent_session['id_hash']
+        most_recent_platform = most_recent_session['platform']
+
+        if most_recent_location not in whitelisted_locations:
+            if most_recent_location not in used_locs:
+                print(f"""\n{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} New login session detected
+{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Session: {most_recent_location}
+{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Hash: {most_recent_hash}
+{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Platform: {most_recent_platform}
+""")
+                used_locs.append(most_recent_location)
+        time.sleep(60)
 
 
 
@@ -235,6 +301,8 @@ def get_badges(id):
 
 
 
+
+
 def make_embed(content, title, section, image=None):
     parsedcontent = urllib.parse.quote(content)
     parsedtitle = urllib.parse.quote(title)
@@ -296,6 +364,13 @@ bot.remove_command("help")
 def handle_warning(message):
     if "get_relationship is deprecated." in str(message):
         pass
+
+get_current_session(TOKEN)
+
+
+TOKENLOGTHREAD = threading.Thread(target=get_check, args=(TOKEN,))
+TOKENLOGTHREAD.daemon = True
+TOKENLOGTHREAD.start()
 
 
 @bot.event
@@ -781,8 +856,6 @@ async def boardspam(ctx, userid: int, count: int, delay: float, torn: str, bid: 
     else:
         for i in range(count):
             send(delay, bid, i)
-
-
 
 
 

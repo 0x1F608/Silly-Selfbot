@@ -18,3 +18,6 @@
 - Added portscan
 - Added restart
 - Added Iplookup
+- Added session detector
+- Nicer UI
+- Added misc commands
