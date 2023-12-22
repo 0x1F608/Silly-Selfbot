@@ -25,11 +25,14 @@ from discord.ext import commands
 
 
 def setup_ui():
-    password = input("What password do you want to use for the panel?") 
+    password = "password"
+    idk = []
     settings = gui.Settings()
     window = gui.Window(bot,"SBName",password,{},settings) 
     window.register() 
-    threading.Thread(target=window.run).start() 
+    t = threading.Thread(target=window.run)
+    t.daemon = True
+    t.start()
     print("GUI is online on http://localhost:8080")
     
 
@@ -538,7 +541,7 @@ async def on_message(message: discord.Message):
 # >----------------<
 
 @bot.command()
-async def HELP(ctx):
+async def help(ctx):
     await ctx.message.delete()
     help_content = f"""
 {PREFIX} [section] [page] ? Default is 1
