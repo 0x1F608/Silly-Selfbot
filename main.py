@@ -59,6 +59,7 @@ def make_config():
     nitro_sniper = input("| ~ > Nitro Sniper [y/n] : ")
     ghost_ping = input("| ~ > Ghostping Logger [y/n] : ")
     session_detecter = input("| ~ > Session detector [y/n] : ")
+    afk_message = input("| ~ > Afk Message: ")
 
     if give_joiner.lower() == "y":
         give_joiner = "True"
@@ -90,7 +91,8 @@ def make_config():
             "NITRO-SNIPER" : nitro_sniper,
             "GHOSTPING-LOGGER" : ghost_ping,
             "SESSION-DETECTOR" : session_detecter 
-        }
+        },
+        "AFK-MESSAGE" : afk_message
     }
 
     with open('Settings/config.json', 'w') as file:
@@ -260,7 +262,8 @@ def load_settings():
         GHOSTLOG = config.get('SNIPERS').get('GHOSTPING-LOGGER')
         SESSDET = config.get('SNIPERS').get('SESSION-DETECTOR')
         SELFDET = config.get('SNIPERS').get('SELFBOT-DETECTOR')
-        return TOKEN, PREFIX, IPAPI, GIVEJOIN, NITROSNIPE, GHOSTLOG, SESSDET, SELFDET
+        AFKMES = config.get('AFK-MESSAGE')
+        return TOKEN, PREFIX, IPAPI, GIVEJOIN, NITROSNIPE, GHOSTLOG, SESSDET, SELFDET, AFKMES
 
 def load_theme():
     with open('Settings/theme.json', 'r') as f:
@@ -382,8 +385,10 @@ def givejoiner(message):
 
 # have to define here for embed reasons
 
-TOKEN, PREFIX, APIIPKEY, GIVEAWAYJOIN, NITROSNIPER, GHOSTPINGLOG, SESSIONDETECT, SELFBOTDET = load_settings()
+TOKEN, PREFIX, APIIPKEY, GIVEAWAYJOIN, NITROSNIPER, GHOSTPINGLOG, SESSIONDETECT, SELFBOTDET, AFKMES = load_settings()
 AUTHOR, IMAGE, COLOR = load_theme()
+global AFK
+AFK = True
 
 
 def get_badges(id):
@@ -572,6 +577,10 @@ async def on_message(message: discord.Message):
         if GIVEAWAYJOIN == "True":
             givejoiner(message)
 
+    elif bot.user.mentioned_in(message):
+        if AFK == True:
+            print("SHDFBSKHD")
+            await message.reply(content=AFKMES)
     else:
         await bot.process_commands(message)
 
@@ -1546,6 +1555,23 @@ async def block(ctx, id: int):
     url = f"https://discord.com/api/v9/users/@me/relationships/{id}"
     data = {'type' : 2}
     requests.put(url, headers=global_headers, json=data)
+
+
+@bot.command()
+async def afk(ctx, tof: str):
+    global AFK
+    if tof == "1":
+        AFK = True
+    else:
+        AFK = False
+
+
+
+
+
+
+
+
 
 # >----------------<
 #   Test commands
