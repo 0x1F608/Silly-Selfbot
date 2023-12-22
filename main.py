@@ -31,20 +31,110 @@ def title(args=None):
     os.system("title Silly Selfbot") if args == None else os.system(f"title Silly Selfbot [~] {args}")
 
 
+def make_config():
+    token = input("| ~ > Token: ")
+    prefix = input("| ~ > prefix: ")
+    ipapikey = input("| ~ > IP Api key (leave blank if you do not know): ")
+    
+    data = {
+        "TOKEN": token,
+        "PREFIX": prefix,
+        "IPLOOKUP-API-KEY": ipapikey
+    }
 
-def make_config(error):
-    with open('Settings/config.json', 'w') as f:
-        token = str(input(F"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > Token: "))
-        prefix = str(input(F"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > Prefix: "))
-        ipkey = str(input(F"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > Api key [if you are unsure press enter]: "))
-        data = {}
-        data = ({
-            "TOKEN" : token,
-            "PREFIX" : prefix,
-            "IPLOOKUP-API-KEY" : ipkey
-        })
-        json.dump(data, f)
+    with open('Settings/config.json', 'w') as file:
+        json.dump(data, file, indent=4)
 
+
+def make_theme():
+    data = {
+        "AUTHOR" : "Silly Selfbot",
+        "EMBED-IMAGE" : "https://www.startpage.com/sp/sxpra?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fen%2Fthumb%2F6%2F63%2FFeels_good_man.jpg%2F1200px-Feels_good_man.jpg",
+        "COLOR" : "#8191E0"
+        }
+
+    with open("Settings/theme.json", 'w') as file:
+        json.dump(data, file, indent=4)
+
+
+def make_giveaway_bots_settings():
+    data = {
+        "GiveawayBot" : {
+            "name" : "GiveawayBot",
+            "discrim" : "2381",
+            "Application_ID" : "294882584201003009",
+            "React-Mode" : {
+                "Type" : "2",
+                "button_data" : {
+                    "component_type" : 2,
+                    "custom_id" : "enter-giveaway"
+                },
+                "emoji_data" : {
+                    "emoji" : ""
+                }
+            },
+            "Win-Data" : "Congratulations"
+        },
+        "Carl-bot" : {
+            "name" : "Carl-bot",
+            "discrim" : "1536",
+            "Application_ID" : "235148962103951360",
+            "React-Mode" : {
+                "Type" : "2",
+                "button_data" : {
+                    "component_type" : 2,
+                    "custom_id" : "giveaway"
+                },
+                "emoji_data" : {
+                    "emoji" : ""
+                }
+            },
+            "Win-Data" : "Congratulations"
+        }
+    }
+    with open ("Settings/giveaway_bots.json", 'w') as file:
+        json.dump(data, file, indent=4)
+
+
+
+def get_assets_names():
+   first_names = "https://cdn.discordapp.com/attachments/1187718382355746816/1187718418850398329/First_names.txt?ex=6597e7f9&is=658572f9&hm=4a109460c1393be7cda3f964806d1d2bf162cfad628e307d8d23a01e3332484f&"
+   last_names = "https://cdn.discordapp.com/attachments/1187718382355746816/1187718418447728710/Last_names.txt?ex=6597e7f9&is=658572f9&hm=5f8269f7d509ee9cd0c6bee4a019013181b1cd74109e94fbf06b8d2ac9faf44f&"
+   r = requests.get(first_names)
+   with open('assets/First_names.txt', 'wb') as file:
+       file.write(r.content)
+   
+   r = requests.get(last_names)
+   with open("assets/Last_names.txt", 'wb') as file:
+       file.write(r.content)
+
+
+def check_files():
+    items = os.listdir()
+
+
+    folders_to_check = ["Wordlists", "Settings", "Scripts", "Lyrics", "Logs", "assets"]
+
+    for folder in folders_to_check:
+        if folder not in items:
+            os.mkdir(folder)
+
+    settings_files = os.listdir("Settings")
+    if "config.json" not in settings_files:
+        make_config()
+
+    if "theme.json" not in settings_files:
+        make_theme()
+
+    if "giveaway_bots.json" not in settings_files:
+        make_giveaway_bots_settings()
+
+    assets_files = os.listdir("assets")
+    if "Firstnames.txt" or "Lastnames.txt" not in assets_files:
+        get_assets_names()
+
+
+check_files()
 
 whitelisted_locations = []
 
@@ -438,19 +528,19 @@ async def HELP(ctx):
     help_content = f"""
 {PREFIX} [section] [page] ? Default is 1
 >------------------------------------<
-{PREFIX}RAID      ? Raid commands
-{PREFIX}RECON     ? Recon commands
-{PREFIX}CRACKING  ? Cracking commands
-{PREFIX}UTILITIES ? Utility commands
-{PREFIX}FUN       ? Fun commands
-{PREFIX}TROLL     ? Troll commands
-{PREFIX}ACCOUNT   ? Account commands
+{PREFIX}raid      ? Raid commands
+{PREFIX}recon     ? Recon commands
+{PREFIX}cracking  ? Cracking commands
+{PREFIX}utilities ? Utility commands
+{PREFIX}fun       ? Fun commands
+{PREFIX}troll     ? Troll commands
+{PREFIX}account   ? Account commands
 """
     url = make_embed(help_content, "Help pg.1", "Help", IMAGE)
     await ctx.send(url)
 
 @bot.command()
-async def RAID(ctx, page: int):
+async def raid(ctx, page: int):
     await ctx.message.delete()
     page_1_help_content = f"""
 {PREFIX}chatspam [message] [amount] ? Spam chat messages
@@ -486,7 +576,7 @@ async def RAID(ctx, page: int):
 
 
 @bot.command()
-async def RECON(ctx, page: int):
+async def recon(ctx, page: int):
     await ctx.message.delete()
     page_1_help_content = f"""
 {PREFIX}serverinfo ? Get the current servers info
@@ -497,7 +587,7 @@ async def RECON(ctx, page: int):
     await ctx.send(url)
 
 @bot.command()
-async def CRACKING(ctx, page: int):
+async def cracking(ctx, page: int):
     await ctx.message.delete()
     page_1_help_content = f"""
 {PREFIX}hashforce [hash] [algorithm] [wordlist] ? Crack a hash
@@ -507,7 +597,7 @@ async def CRACKING(ctx, page: int):
     await ctx.send(url)
 
 @bot.command()
-async def UTILITIES(ctx, page: int):
+async def utilities(ctx, page: int):
     await ctx.message.delete()
     page_1_help_content = f"""
 {PREFIX}setplaying [game]       ? Set playing
@@ -530,7 +620,7 @@ async def UTILITIES(ctx, page: int):
     await ctx.send(url)
 
 @bot.command()
-async def FUN(ctx, page: int):
+async def fun(ctx, page: int):
     await ctx.message.delete()
     page_1_help_content = f"""
 {PREFIX}sing [song file] [delay] ? Sing a song
@@ -543,7 +633,7 @@ async def FUN(ctx, page: int):
     await ctx.send(url)
 
 @bot.command()
-async def TROLL(ctx, page: int):
+async def troll(ctx, page: int):
     await ctx.message.delete()
     page_1_help_content = f"""
 {PREFIX}tokensniff [@user]                ? Sniff a users token
@@ -557,7 +647,7 @@ async def TROLL(ctx, page: int):
     await ctx.send(url)
 
 @bot.command()
-async def ACCOUNT(ctx, page: int):
+async def account(ctx, page: int):
     await ctx.message.delete()
     page_1_help_content = f"""
 {PREFIX}changebio [content] ? Change BIO
