@@ -1,1 +1,1 @@
-{"Setting1": {"type": 0, "value": true}, "Setting2": {"type": 1, "value": 124}, "Setting3": {"type": 2, "value": 50}, "Setting4": {"type": 3, "value": "Hello world"}}
+{"Test One": {"type": 3, "value": "Suck it", "options": []}, "Slider": {"type": 2, "value": "0", "options": []}}

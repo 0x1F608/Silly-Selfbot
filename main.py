@@ -27,14 +27,17 @@ from discord.ext import commands
 def setup_ui():
     password = "password"
     idk = []
-    settings = gui.Settings()
-    window = gui.Window(bot,"SBName",password,{},settings) 
+    settings = gui.Settings(
+        [
+            gui.Setting(gui.WidgetType.STRING, "Test One", "Default value"),
+            gui.Setting(gui.WidgetType.NUMBER_SLIDER, "Slider", 50),
+        ]
+    )
+    window = gui.Window(bot,"Silly Selfbot",password,{},settings) 
     window.register() 
     t = threading.Thread(target=window.run)
     t.daemon = True
     t.start()
-    print("GUI is online on http://localhost:8080")
-    
 
 
 
@@ -510,7 +513,8 @@ async def on_message_delete(message):
             if message.author != bot.user:
                 print(f"""\n{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Ghost ping detected!!
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} User: {message.author} | {message.author.id}
-{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Channel: {message.guild} | {message.channel}""")
+{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Channel: {message.guild} | {message.channel}
+{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Content: {message.content}""")
 
 
 @bot.event
