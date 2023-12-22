@@ -12,6 +12,8 @@ import websocket
 import subprocess
 import socket
 import random
+import pygui as gui
+#import webview
 from json import dumps
 from winotify import Notification, audio
 from datetime import datetime
@@ -20,6 +22,18 @@ from pystyle import Colorate, Colors, Center, Box
 from discord.ext import commands
 
 # Define key functions
+
+
+def setup_ui():
+    password = input("What password do you want to use for the panel?") 
+    settings = gui.Settings()
+    window = gui.Window(bot,"SBName",password,{},settings) 
+    window.register() 
+    threading.Thread(target=window.run).start() 
+    print("GUI is online on http://localhost:8080")
+    
+
+
 
 
 
@@ -466,6 +480,7 @@ TOKENLOGTHREAD.start()
 @bot.event
 async def on_ready():
     window_notif("Silly Selfbot", "Silly Selfbot is ready", f"Logged in as: {bot.user.name}", True)
+    setup_ui()
     load_scripts()
     execute_scripts()
     clears()
