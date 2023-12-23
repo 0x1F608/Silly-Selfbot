@@ -13,7 +13,6 @@ import subprocess
 import socket
 import random
 import pygui as gui
-#import webview
 from json import dumps
 from winotify import Notification, audio
 from datetime import datetime
@@ -43,12 +42,38 @@ def make_config():
     token = input("| ~ > Token: ")
     prefix = input("| ~ > prefix: ")
     ipapikey = input("| ~ > IP Api key (leave blank if you do not know): ")
-    
+    gj = input("| ~ > Giveaway joiner [y/n] : ")
+    if gj.lower() == "y":
+        gj = "True"
+    ns = input("| ~ > Nitro Sniper [y/n] : ")
+    if ns.lower() == "y":
+        ns = "True"
+    gl = input("| ~ > Ghostping logger [y/n] : ")
+    if gl.lower() == "y":
+        gl = "True"
+    ssd = input("| ~ > Session Detector [y/n] : ")  
+    if ssd.lower() == "y":
+        ssd = "True"
+    sbd = input("| ~ > Selfbot detection [y/n] : ")
+    if sbd.lower() == "y":
+        sbd = "True"
+    afkm = input("| ~ > AFK message: ")
+
+
     data = {
         "TOKEN": token,
         "PREFIX": prefix,
-        "IPLOOKUP-API-KEY": ipapikey
+        "IPLOOKUP-API-KEY": ipapikey,
+        "SNIPERS" : {
+            "GIVEAWAY-JOINER" : gj,
+            "NITRO-SNIPER" : ns,
+            "GHOSTPING-LOGGER" : gl,
+            "SESSION-DETECTOR" : ssd,
+            "SELFBOT-DETECTOR" : sbd
+        },
+        "AFK-MESSAGE" : afkm
     }
+
 
     with open('Settings/config.json', 'w') as file:
         json.dump(data, file, indent=4)
@@ -222,7 +247,9 @@ def load_settings():
         GPING = config.get('SNIPERS').get('GHOSTPING-LOGGER')
         SESSDET = config.get('SNIPERS').get('SESSION-DETECTOR')
         SBDET = config.get('SNIPERS').get('SELFBOT-DETECTOR')
-        return TOKEN, PREFIX, IPAPI, GIVEJOIN, NSNIPE, GPING, SESSDET, SBDET
+        AFKMES = config.get('AFK-MESSAGE')
+        GI = config.get('GUI')
+        return TOKEN, PREFIX, IPAPI, GIVEJOIN, NSNIPE, GPING, SESSDET, SBDET, AFKMES ,GI
 
 
 
@@ -237,7 +264,7 @@ def load_theme():
         return AUTHOR, IMAGE, COLOR
 
 
-TOKEN, PREFIX, APIIPKEY, GJOIN, NITSNI, GHOP, SDET, SBDET = load_settings()
+TOKEN, PREFIX, APIIPKEY, GJOIN, NITSNI, GHOP, SDET, SBDET, AFKM, GUITOF = load_settings()
 AUTHOR, IMAGE, COLOR = load_theme()
 
 
@@ -487,6 +514,9 @@ def handle_warning(message):
 get_current_session(TOKEN)
 
 
+
+
+
 TOKENLOGTHREAD = threading.Thread(target=get_check, args=(TOKEN,))
 TOKENLOGTHREAD.daemon = True
 TOKENLOGTHREAD.start()
@@ -527,6 +557,8 @@ async def on_ready():
     print(f"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > Badges: {badges}")
     print(f"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > Loaded {cmdcount} commands")
     print(f"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > Run {PREFIX}HELP for help")
+
+
 
 @bot.event
 async def on_command_error(ctx, error):
