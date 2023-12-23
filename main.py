@@ -25,6 +25,7 @@ from discord.ext import commands
 
 
 
+
 def clears():
     os.system("cls") if os.name == "nt" else os.system("clear")
 
@@ -507,9 +508,6 @@ def setup_ui():
     t = threading.Thread(target=window.run)
     t.daemon = True
     t.start()
-
-
-
 
 @bot.event
 async def on_ready():
@@ -1631,7 +1629,11 @@ async def sm(ctx, name: str):
 
             r = requests.post(f"https://discord.com/api/v9/channels/{channel['id']}/invites", headers=headers, json=data)
             decode = r.json()
-            url = make_embed(f"Name: {name}\nInvite: discord.gg/{decode.get('code')}", "Server make", "Account", IMAGE)
+            info = f"""
+Name: {name}
+Invite: discord.gg/{decode.get('code')}
+"""
+            url = make_embed(info, "Server make", "Server maker", IMAGE)
             await ctx.send(url)
 
 

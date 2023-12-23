@@ -6,6 +6,9 @@ from gevent.pywsgi import WSGIServer  # WSGI server for Flask
 import discord  # Needed for the bot. REPLACE THIS WITH THE LIBRARY YOU USE IF IT DIFFERS!!
 import secrets  # Needed for flask session
 import json  # Needed for the Settings class
+import time
+import requests
+
 
 class Status(Enum):
     """
@@ -30,6 +33,25 @@ class WidgetType(Enum):
     RADIO_BUTTON = 4
 
 
+# @NOTE: Unused for now but may be used in the future
+class VeryGoodTTL:
+    def __init__(self, ttl=15):
+        self.ttl = ttl  # Time to live in mins
+        self.cache = {}
+
+    def get(self, key):
+        if key in self.cache:
+            # So it is in minutes not seconds
+            if (time.time() - self.cache[key][0]) < self.ttl * 60:
+                return self.cache[key][1]
+            else:
+                del self.cache[key]
+        return None
+
+    def set(self, key, value):
+        self.cache[key] = (time.time(), value)
+
+
 class Setting:
     """
     This class represents a setting.
@@ -39,7 +61,8 @@ class Setting:
         self.wtype = wtype
         self.name = name
         self.value = value
-        self.options = options  # This is only used when wtype is RADIO_BUTTON (4)
+        # This is only used when wtype is RADIO_BUTTON (4)
+        self.options = options
 
 
 class Settings:
@@ -168,10 +191,7 @@ class Settings:
                     exit(1)
                 except Exception as e:
                     raise e
-
-        raise AttributeError(
-            f"The {name} setting does not exist. In the object {self.__class__.__name__}"
-        )
+        raise AttributeError(f"The {name} setting does not exist. In the object {self.__class__.__name__}")  # nopep8
 
 
 class Message:
@@ -186,6 +206,13 @@ class Message:
     # Show as a dict
     def as_dict(self):
         return {"content": self.content, "status": self.status}
+
+
+def deceprated(func):
+    # This is just a decorator that makes the source code look nicer
+    # I know this is a terrible way to do anything but I like it this way.
+    # If you are so annoyed make a PR
+    pass
 
 
 class Window:
@@ -207,6 +234,7 @@ class Window:
         self.botname = bot_name
         self.functions = functions
         self.settings = settings
+        self.discordcache = VeryGoodTTL(15)
 
     def register(self):
         """
@@ -218,6 +246,49 @@ class Window:
 
         self.server.secret_key = secrets.token_hex()
 
+        @deceprated
+        def get_relations():
+            if self.discordcache.get("relations") is None:
+                global_headers = {
+                    'authorization': "DECEPRATED",
+                    'authority': 'discord.com',
+                    'accept': '*/*',
+                    'accept-language': 'sv,sv-SE;q=0.9',
+                    'content-type': 'application/json',
+                    'origin': 'https://discord.com',
+                    'referer': 'https://discord.com/',
+                    'sec-ch-ua': '"Not?A_Brand";v="8", "Chromium";v="108"',
+                    'sec-ch-ua-mobile': '?0',
+                    'sec-ch-ua-platform': '"Windows"',
+                    'sec-fetch-dest': 'empty',
+                    'sec-fetch-mode': 'cors',
+                    'sec-fetch-site': 'same-origin',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) discord/1.0.9016 Chrome/108.0.5359.215 Electron/22.3.12 Safari/537.36',
+                    'x-debug-options': 'bugReporterEnabled',
+                    'x-discord-locale': 'sv-SE',
+                    'x-discord-timezone': 'Europe/Stockholm',
+                }
+                url = "https://discord.com/api/v9/users/@me/relationships"
+                req = requests.get(
+                    url, headers=global_headers)
+                resp = req.json()
+                friends = len(
+                    [user for user in resp if user.get('type') == 1])
+                pendinginc = len(
+                    [user for user in resp if user.get('type') == 3])
+                pendingout = len(
+                    [user for user in resp if user.get('type') == 4])
+                blocked = len(
+                    [user for user in resp if user.get('type') == 2])
+                self.discordcache.set(
+                    "relations",
+                    {"friends": friends, "pendinginc": pendinginc,
+                        "pendingout": pendingout, "blocked": blocked},
+                )
+                return self.discordcache.get("relations")
+            else:
+                return self.discordcache.get("relations")
+
         @self.server.route("/")
         def index():
             return flask.render_template(
@@ -227,6 +298,9 @@ class Window:
                 servers=self.bot.guilds.__len__(),
                 friends=self.bot.user.friends.__len__(),
                 validpass=self.password == flask.session.get("password"),
+                friendcount=self.bot.user.friends.__len__(),
+                blockcount=self.bot.user.blocked.__len__(),
+                hasnitro12=int(self.bot.user.premium) + 1
             )
 
         self.server.static_folder = os.path.join(
@@ -245,7 +319,7 @@ class Window:
                 WidgetType=WidgetType,
                 settings=self.settings,
                 sess=flask.session["password"],
-                sbname=self.botname,
+                sbname=self.botname
             )
 
         @self.server.route("/functions")
@@ -285,10 +359,10 @@ class Window:
             if function_obj.__code__.co_argcount != len(data) - 1:
                 return Message("Invalid number of arguments", Status.ERROR).as_dict()
             if function_obj.__code__.co_argcount == 0:
-                return Message(function_obj(),Status.SUCCESS).as_dict()
+                return Message(function_obj(), Status.SUCCESS).as_dict()
             else:
                 data.pop("password")
-                return Message(function_obj(*data.values().__str__()),Status.SUCCESS).as_dict()
+                return Message(function_obj(*data.values().__str__()), Status.SUCCESS).as_dict()
 
         @self.server.post("/api/setting/get/<setting_name>")
         def api_setting_get(setting_name: str):

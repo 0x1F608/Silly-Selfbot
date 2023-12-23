@@ -346,3 +346,36 @@ input[type="range"]:active::-moz-range-progress {
     font-size: 16px;
   }
 }
+
+.stat-container {
+  position: relative;
+  width: 300px;
+  height: 5px;
+  background-color: #ccc;
+  border-radius: 15px;
+}
+
+.stat-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0;
+  background-color: rgb(22 163 74);
+  transition: width 1s ease-in-out;
+  border-radius: 15px;
+}
+
+.slred {
+  background-color: rgb(239 68 68) !important;
+}
+
+.slyellow {
+  background-color: rgb(253 224 71) !important;
+}
+
+@keyframes grow {
+  from {
+    width: 0;
+  }
+}

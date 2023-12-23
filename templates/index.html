@@ -5,6 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{sbname}} - Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <script defer>
+      function setline(elementID,percentage,maxPercentage) {
+        const bstatPercentage = percentage;
+        const bstatLine = document.getElementById(elementID);
+        const bstatWidth = (bstatPercentage / maxPercentage) * document.querySelector('.stat-container').clientWidth;
+        bstatLine.style.width = `${bstatWidth}px`;
+        bstatLine.style.animation = 'grow 1s ease-in-out';
+      }
+      window.onload = () => {
+        {% if validpass %}
+        setline("friendline",{{ friendcount }},100);
+        setline("blockedline",{{ blockcount }},50);
+        setline("guildline",{{ servers }},100 * {{ hasnitro12 }});
+        {% endif %}
+      }
+    </script>
     <script src="{{ url_for('static', filename='index.js') }}" defer></script>
   </head>
   <body>
@@ -15,8 +31,20 @@
       </nav>
     {% if validpass %}
           <h1>Welcome to {{ sbname }}, {{name}}</h1>
-    <p>Friends: {{ friends }}</p>
-    <p>Guilds: {{ servers }}</p>
+          <br>
+    <h1>Friends added:</h1> 
+    <div class="stat-container">
+      <div class="stat-line" id="friendline"></div>
+    </div>
+    <h1>Blocked:</h1> 
+    <div class="stat-container">
+      <div class="stat-line slred" id="blockedline"></div>
+    </div>
+    <h1>Guilds:</h1>
+    <div class="stat-container">
+      <div class="stat-line slyellow" id="guildline"></div>
+    </div>
+<br>
     {% if motd %}
     <p>Motd: {{ motd }}</p>
     {% endif %}
