@@ -14,7 +14,6 @@
         } else {
           var value = document.getElementById(settingName).value;
         }
-        alert("{{sess}}")
         let res = await fetch("/api/setting/set/" + settingName,{
           method: "POST",
           headers: {
@@ -29,7 +28,7 @@
           alert("Please make sure you aren't inserting invalid characters (ex: Letters in number field)")
           return
         }
-        let resp = res.json()
+        let resp = await res.json()
         if(resp.status != "SUCCESS") {
           alert(resp.content) 
         }
@@ -55,9 +54,15 @@
                 {% elif setting.wtype == WidgetType.NUMBER_FIELD %}
                 <input class="settinginput" type="number" name="{{ setting.name }}" id="{{ setting.name }}" value="{{ setting.value }}">
                 {% elif setting.wtype == WidgetType.NUMBER_SLIDER %}
-                <input class="settinginput" type="range" name="{{ setting.name }}" id="{{ setting.name }}" value="{{ setting.value }}" min="0" max="100">
+                <p>1 slide step is {{ setting.options[3] }}</p>
+                <input class="settinginput" type="range" name="{{ setting.name }}" id="{{ setting.name }}" value="{{ setting.value }}" min="{{ setting.options[0] }}" max="{{ setting.options[1] }}" step="{{ setting.options[2] }}">
                 {% elif setting.wtype == WidgetType.BOOLEAN %}
                 <input class="settinginput" type="checkbox" name="{{ setting.name }}" id="{{ setting.name }}" {% if setting.value %}checked{% endif %}>                 
+                {% elif setting.wtype == WidgetType.RADIO_BUTTON %}
+                  {% for opt in setting.options %}
+        <input class="settinginput" type="radio" name="{{setting.name}}" id="{{setting.name}}" value="{{opt}}">
+          <label for="{{setting.name}}">{{opt}}</label>
+                  {% endfor %}
                 {% endif %}
 
                 <button type="submit" onclick="setSetting('{{ setting.name }}')">Set Setting</button>

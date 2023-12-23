@@ -23,7 +23,7 @@
     {% else %}
     <h1>You aren't logged in</h1>
       <label for="panelpassword">Enter your panel password to continue</label>
-      <div>
+      <div onkeydown="keyDown(event)">
         <input type="password" required class="passwordInput" id="pass" />
         <button onclick="validate()" type="submit"">Log in</button>
       </div>

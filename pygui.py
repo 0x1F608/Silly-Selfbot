@@ -1,6 +1,3 @@
-"""
-    PyGUI library
-"""
 import os  # Os for path stuff
 from enum import Enum  # Enum for enums
 from typing import Callable, List  # Used for type hinting
@@ -9,7 +6,6 @@ from gevent.pywsgi import WSGIServer  # WSGI server for Flask
 import discord  # Needed for the bot. REPLACE THIS WITH THE LIBRARY YOU USE IF IT DIFFERS!!
 import secrets  # Needed for flask session
 import json  # Needed for the Settings class
-
 
 class Status(Enum):
     """
@@ -31,6 +27,7 @@ class WidgetType(Enum):
     NUMBER_FIELD = 1
     NUMBER_SLIDER = 2
     STRING = 3
+    RADIO_BUTTON = 4
 
 
 class Setting:
@@ -38,10 +35,11 @@ class Setting:
     This class represents a setting.
     """
 
-    def __init__(self, wtype: WidgetType, name: str, value):
+    def __init__(self, wtype: WidgetType, name: str, value, options: List[str] = []):
         self.wtype = wtype
         self.name = name
         self.value = value
+        self.options = options  # This is only used when wtype is RADIO_BUTTON (4)
 
 
 class Settings:
@@ -64,45 +62,51 @@ class Settings:
         self.filename = filename
         self.blackistedSettings = ["token"]
 
-        # Do some work with the file, write the settings and its values
-        if len(settings) == 0:
-            # Try to open the provided filename and read the settings from it
-            try:
-                with open(filename, "r") as f:
-                    # Convert contents to json
-                    fileJson = json.load(f)
-                    for setting in fileJson:
-                        if setting in self.blackistedSettings:
-                            continue
-                        if (
-                            "type" not in fileJson[setting]
-                            or "value" not in fileJson[setting]
-                        ):
-                            raise Exception("Malformed settings file")
-                        self.settings.append(
-                            Setting(
-                                WidgetType(fileJson[setting]["type"]),
-                                setting,
-                                fileJson[setting]["value"],
-                            )
-                        )
-                    # nothing for now
-            except FileNotFoundError:
-                # Make a new file
-                with open(filename, "w") as f:
-                    dict_soon_json: dict = {
-                        "Setting1": {
-                            "type": 0,
-                            "value": True,
-                        },
-                        "Setting2": {"type": 1, "value": 124},
-                        "Setting3": {"type": 2, "value": 50},
-                        "Setting4": {"type": 3, "value": "Hello world"},
+        # Try to open the provided filename and read the settings from it
+        if self.filename not in os.listdir():
+            self.initConfig()
+            return
+
+        if len(self.settings) != 0:
+            return
+
+        with open(filename, "r") as f:
+            # Convert contents to json
+            fileJson = json.load(f)
+            for setting in fileJson:
+                if setting in self.blackistedSettings:
+                    continue
+                if (
+                    "type" not in fileJson[setting]
+                    or "value" not in fileJson[setting]
+                    or "options" not in fileJson[setting]
+                ):
+                    raise Exception("Malformed settings file")
+                self.settings.append(
+                    Setting(
+                        WidgetType(fileJson[setting]["type"]),
+                        setting,
+                        fileJson[setting]["value"],
+                        fileJson[setting]["options"],
+                    )
+                )
+
+    def initConfig(self) -> None:
+        if len(self.settings) != 0:
+            with open(self.filename, "w") as f:
+                # Convert self.settings into a dict which we can turn to a json later
+                settings_as_dict = {}
+                for setting in self.settings:
+                    settings_as_dict[setting.name] = {
+                        "type": setting.wtype.value,
+                        "value": setting.value,
+                        "options": setting.options,
                     }
-                    jsoned_dict = json.dumps(dict_soon_json)
-                    f.write(jsoned_dict)
-            except Exception as e:
-                raise e
+                jsoned_dict = json.dumps(settings_as_dict)
+                f.write(jsoned_dict)
+        else:
+            print("[FATAL] No settings file found and no templates given")
+            exit(1)
 
     def get(self, name) -> Setting | None:
         """
@@ -135,7 +139,6 @@ class Settings:
         """
         for setting in self.settings:
             if setting.name == name:
-                # print("Found... setting value")
                 if (
                     setting.wtype == WidgetType.NUMBER_FIELD
                     or setting.wtype == WidgetType.NUMBER_SLIDER
@@ -147,14 +150,15 @@ class Settings:
                         raise AttributeError(
                             f"{value} is not a number. Changing types aren't allowed!"
                         )
+                elif setting.wtype == WidgetType.RADIO_BUTTON:
+                    if value not in setting.options:
+                        raise AttributeError(f"{value} is not a valid option")
                 setting.value = value
                 try:
                     filejson = None
                     with open(self.filename, "r") as f:
                         filejson = json.load(f)
                     filejson[setting.name]["value"] = value
-                    # print(filejson[setting.name])
-                    # exit(1)
                     with open(self.filename, "w") as f:
                         jsoned_dict = json.dumps(filejson)
                         f.write(jsoned_dict)
@@ -246,7 +250,18 @@ class Window:
 
         @self.server.route("/functions")
         def functions():
-            return flask.render_template("functions.html", sbname=self.botname)
+            if (
+                flask.session.get("password") is None
+                or flask.session.get("password") != self.password
+            ):
+                return flask.redirect("/")
+            return flask.render_template(
+                "functions.html",
+                WidgetType=WidgetType,
+                functions=self.functions,
+                sess=flask.session["password"],
+                sbname=self.botname,
+            )
 
         @self.server.post("/validate")
         def validate():
@@ -261,7 +276,6 @@ class Window:
         @self.server.post("/api/function/<function>")
         def apiFunc(function: str):
             body = flask.request.get_data().decode()
-            # print(body)
             data: dict = json.loads(body)
             if data.get("password") is None or data.get("password") != self.password:
                 return Message("Invalid password", Status.FATAL).as_dict()
@@ -271,12 +285,10 @@ class Window:
             if function_obj.__code__.co_argcount != len(data) - 1:
                 return Message("Invalid number of arguments", Status.ERROR).as_dict()
             if function_obj.__code__.co_argcount == 0:
-                return flask.render_template_string(function_obj().__str__())
+                return Message(function_obj(),Status.SUCCESS).as_dict()
             else:
                 data.pop("password")
-                return flask.render_template_string(
-                    function_obj(*data.values().__str__())
-                )
+                return Message(function_obj(*data.values().__str__()),Status.SUCCESS).as_dict()
 
         @self.server.post("/api/setting/get/<setting_name>")
         def api_setting_get(setting_name: str):
@@ -301,8 +313,10 @@ class Window:
                 return Message("Setting not found", Status.ERROR).as_dict()
             if data["value"] is None:
                 return Message("No value is provided", Status.ERROR).as_dict()
-            self.settings.set(setting.name, data["value"])
-            # print("Updated")
+            try:
+                self.settings.set(setting.name, data["value"])
+            except AttributeError as e:
+                return Message(str(e), Status.ERROR).as_dict()
             return Message("Setting updated", Status.SUCCESS).as_dict()
 
         @self.server.errorhandler(404)

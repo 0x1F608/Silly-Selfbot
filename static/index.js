@@ -8,3 +8,9 @@ function validate() {
     }
   })
 }
+
+function keyDown(e){
+  if(e.keyCode == 13){ // Scuffed enter key support
+    validate();
+  }
+}

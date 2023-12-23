@@ -1,7 +1,6 @@
-
 body {
   background-color: #1b1b1b;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-family: "Courier New", Courier, monospace;
   margin: 0;
   padding: 0;
   display: flex;
@@ -10,9 +9,6 @@ body {
   align-items: center;
   color: white;
 }
-
-
-
 nav {
   padding-top: 10px;
   padding-bottom: 10px;
@@ -76,7 +72,7 @@ button {
 
 button:hover {
   background-color: rgba(117, 19, 209, 0.8);
-  border-radius: 10px;
+  /* border-radius: 10px; */
   cursor: pointer;
 }
 

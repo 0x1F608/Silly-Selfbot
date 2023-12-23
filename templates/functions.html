@@ -5,6 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ sbname }} - This feature is not ready yet</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        async function callFunction(functionName) {
+            let res = await fetch("/api/function/" + functionName, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "password": "{{ sess }}",
+                })
+            })
+            let resp = await res.json()
+            if (resp.status != "SUCCESS") {
+                alert(resp.content)
+            } else {
+                document.getElementById(functionName + "-output").innerHTML = "Function response: <br>" + resp.content
+            }
+        }
+    </script>
 </head>
 <body>
     <nav>
@@ -12,7 +31,11 @@
         <a href="/settings">Settings</a>
         <a href="/functions">Functions</a>
     </nav>
-    <h1>This feature is not ready (yet)</h1>
-    <h2>Please check back later!</h2>
+    {% for function in functions %}
+    <div class="setting"> <!-- Reusing the setting style -->
+        <button type="submit" onclick="callFunction('{{ function }}')">{{ function }}</button>
+        <h2 id="{{ function }}-output"></h2>
+    </div>
+    {% endfor %}
 </body>
 </html>

@@ -24,31 +24,18 @@ from discord.ext import commands
 # Define key functions
 
 
-def setup_ui():
-    password = "password"
-    idk = []
-    settings = gui.Settings(
-        [
-            gui.Setting(gui.WidgetType.STRING, "Test One", "Default value"),
-            gui.Setting(gui.WidgetType.NUMBER_SLIDER, "Slider", 50),
-        ]
-    )
-    window = gui.Window(bot,"Silly Selfbot",password,{},settings) 
-    window.register() 
-    t = threading.Thread(target=window.run)
-    t.daemon = True
-    t.start()
-
-
-
-
-
 
 def clears():
     os.system("cls") if os.name == "nt" else os.system("clear")
 
 def title(args=None):
     os.system("title Silly Selfbot") if args == None else os.system(f"title Silly Selfbot [~] {args}")
+
+def restart_selfbot():
+    subprocess.run(["python", __file__])
+    print("Restarting...")
+    exit()
+
 
 
 def make_config():
@@ -229,7 +216,16 @@ def load_settings():
         TOKEN = config.get('TOKEN')
         PREFIX = config.get('PREFIX')
         IPAPI = config.get('IPLOOKUP-API-KEY')
-        return TOKEN, PREFIX, IPAPI
+        GIVEJOIN = config.get('SNIPERS').get('GIVEAWAY-JOINER')
+        NSNIPE = config.get('SNIPERS').get('NITRO-SNIPER')
+        GPING = config.get('SNIPERS').get('GHOSTPING-LOGGER')
+        SESSDET = config.get('SNIPERS').get('SESSION-DETECTOR')
+        SBDET = config.get('SNIPERS').get('SELFBOT-DETECTOR')
+        return TOKEN, PREFIX, IPAPI, GIVEJOIN, NSNIPE, GPING, SESSDET, SBDET
+
+
+
+
 
 def load_theme():
     with open('Settings/theme.json', 'r') as f:
@@ -238,6 +234,11 @@ def load_theme():
         IMAGE = settings.get('EMBED-IMAGE')
         COLOR = settings.get('COLOR')
         return AUTHOR, IMAGE, COLOR
+
+
+TOKEN, PREFIX, APIIPKEY, GJOIN, NITSNI, GHOP, SDET, SBDET = load_settings()
+AUTHOR, IMAGE, COLOR = load_theme()
+
 
 info = []
 
@@ -307,6 +308,15 @@ def get_commands_count():
     return commandscount
 
 
+def split_message_length(data):
+    if len(data) >= 1000:
+        lenof = len(data)
+        lennew = lenof // 2
+        fh = data[:lennew]
+        sh = data[lennew:]
+    return fh, sh
+
+
 def givejoiner(message):
     with open('Settings/giveaway_bots.json') as f:
         configdata = json.load(f)
@@ -351,8 +361,6 @@ def givejoiner(message):
 
 # have to define here for embed reasons
 
-TOKEN, PREFIX, APIIPKEY = load_settings()
-AUTHOR, IMAGE, COLOR = load_theme()
 
 
 def get_badges(id):
@@ -483,6 +491,26 @@ TOKENLOGTHREAD.daemon = True
 TOKENLOGTHREAD.start()
 
 
+def setup_ui():
+    password = "password"
+    idk = []
+    settings = gui.Settings(
+        [
+            gui.Setting(gui.WidgetType.STRING, "Change Token", ""),
+            gui.Setting(gui.WidgetType.NUMBER_SLIDER, "Slider", 50),
+        ]
+    )
+    window = gui.Window(bot,"Silly SB",password,{
+        "Restart" : restart_selfbot
+    },settings) 
+    window.register() 
+    t = threading.Thread(target=window.run)
+    t.daemon = True
+    t.start()
+
+
+
+
 @bot.event
 async def on_ready():
     window_notif("Silly Selfbot", "Silly Selfbot is ready", f"Logged in as: {bot.user.name}", True)
@@ -509,9 +537,10 @@ async def on_command_error(ctx, error):
 @bot.event
 async def on_message_delete(message):
     if bot.user.mentioned_in(message):
-        if "@everyone" not in message.content:
-            if message.author != bot.user:
-                print(f"""\n{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Ghost ping detected!!
+        if GHOP == "True":
+            if "@everyone" not in message.content:
+                if message.author != bot.user:
+                    print(f"""\n{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Ghost ping detected!!
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} User: {message.author} | {message.author.id}
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Channel: {message.guild} | {message.channel}
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Content: {message.content}""")
@@ -521,21 +550,23 @@ async def on_message_delete(message):
 async def on_message(message: discord.Message):
     if "discord.gift/" in message.content:
         gift_id = message.content.split('/')[-1]
-        if len(gift_id) > 16:
+        if len(gift_id) > 16:          
             print(f"""\n{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Nitro Detected !!
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Code: discord.gift/{gift_id}
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} User: {message.author} | {message.author.id}
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Channel: {message.guild} | {message.channel }""")
 
     elif "selfbot" in message.content:
-        if message.author.id != bot.user.id:
-            print(f"""\n{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Possible selfbot user detected !!
+        if SBDET == "True":
+            if message.author.id != bot.user.id:
+                print(f"""\n{Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Possible selfbot user detected !!
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Offending item: {message.content}
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} User: {message.author} | {message.author.id}
 {Fore.LIGHTBLACK_EX}[{datetime.now().strftime('%H:%M')}] {Fore.YELLOW}[{Fore.RESET}!{Fore.YELLOW}]{Fore.RESET} Channel: {message.guild} | {message.channel}""")
     
     elif message.author.name in bot_names:
-        givejoiner(message)
+        if GJOIN == "True":
+            givejoiner(message)
 
     else:
         await bot.process_commands(message)
@@ -1180,8 +1211,7 @@ async def invmake(ctx, chanid: int=None):
 async def restart(ctx):
     await ctx.message.delete()
     await ctx.send("Restarting...")
-    subprocess.run(["python", __file__])
-    exit()
+    restart_selfbot()
 
 
 @bot.command()
@@ -1573,17 +1603,36 @@ async def splitmsg(ctx):
         print(f"S: {y}")
 
 @bot.command()
-async def sm(ctx):
+async def sm(ctx, name: str):
     url = "https://discord.com/api/v9/guilds"
-    data = {"name":"Life's server","icon":None,"channels":[],"system_channel_id":None,"guild_template_code":"2TffvPucqHkN"}
+    data = {
+        "name" : name,
+        "icon" : None,
+        "channels" : [],
+        "system_channel_id" : None,
+        "guild_template_code" : "2TffvPucqHkN"
+        }
+    
     headers = {
         'Authorization': TOKEN,  # Add your bot's authorization token here
-        'Content-Type': 'application/json'  # Ensure proper content type for the request
+        'Content-Type': 'application/json',
+        'X-Super-Properties' : 'eyJvcyI6IldpbmRvd3MiLCJicm93c2VyIjoiRmlyZWZveCIsImRldmljZSI6IiIsInN5c3RlbV9sb2NhbGUiOiJlbi1VUyIsImJyb3dzZXJfdXNlcl9hZ2VudCI6Ik1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQ7IHJ2OjEwOS4wKSBHZWNrby8yMDEwMDEwMSBGaXJlZm94LzExNi4wIiwiYnJvd3Nlcl92ZXJzaW9uIjoiMTE2LjAiLCJvc192ZXJzaW9uIjoiMTAiLCJyZWZlcnJlciI6Imh0dHBzOi8vd3d3LnlvdXR1YmUuY29tLyIsInJlZmVycmluZ19kb21haW4iOiJ3d3cueW91dHViZS5jb20iLCJyZWZlcnJlcl9jdXJyZW50IjoiaHR0cHM6Ly90aWNrZXRzYm90Lm5ldC8iLCJyZWZlcnJpbmdfZG9tYWluX2N1cnJlbnQiOiJ0aWNrZXRzYm90Lm5ldCIsInJlbGVhc2VfY2hhbm5lbCI6InN0YWJsZSIsImNsaWVudF9idWlsZF9udW1iZXIiOjI1NjIzMSwiY2xpZW50X2V2ZW50X3NvdXJjZSI6bnVsbCwiZGVzaWduX2lkIjowfQ=='
+        
     }
 
 
     r = requests.post(url, headers=headers, json=data)
-    print(r.status_code, r.json, r)
+    decode = r.json()
+    guild_id = decode.get('id')
+    r = requests.get(f"https://discord.com/api/v9/guilds/{guild_id}/channels", headers=headers)
+    for channel in r.json():
+        if channel['name'] == "general":
+            data = {"max_age":0,"max_uses":0,"target_type":None,"temporary":"false","flags":0}
+
+            r = requests.post(f"https://discord.com/api/v9/channels/{channel['id']}/invites", headers=headers, json=data)
+            decode = r.json()
+            url = make_embed(f"Name: {name}\nInvite: discord.gg/{decode.get('code')}", "Server make", "Account", IMAGE)
+            await ctx.send(url)
 
 
 
