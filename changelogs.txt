@@ -21,3 +21,5 @@
 - Added session detector
 - Nicer UI
 - Added misc commands
+- Server maker
+- Added a GUI

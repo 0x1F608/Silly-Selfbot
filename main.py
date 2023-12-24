@@ -82,7 +82,7 @@ def make_config():
 def make_theme():
     data = {
         "AUTHOR" : "Silly Selfbot",
-        "EMBED-IMAGE" : "https://www.startpage.com/sp/sxpra?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fen%2Fthumb%2F6%2F63%2FFeels_good_man.jpg%2F1200px-Feels_good_man.jpg",
+        "EMBED-IMAGE" : "https://i.imgur.com/qzfHxxO.gif",
         "COLOR" : "#8191E0"
         }
 
@@ -542,21 +542,23 @@ def setup_ui():
 @bot.event
 async def on_ready():
     window_notif("Silly Selfbot", "Silly Selfbot is ready", f"Logged in as: {bot.user.name}", True)
-    setup_ui()
+    if GUITOF == "True":
+        setup_ui()
+        subprocess.run(['start', 'http://127.0.0.1:8080/'], shell=True)
     load_scripts()
     execute_scripts()
     clears()
     title(f"Server count: {len(bot.guilds) - 2}")
     cform = getfriends()
     cmdcount = get_commands_count()
-    badges = get_badges(bot.user.id)
     print(Colorate.Vertical(Colors.blue_to_purple, Center.XCenter(ASCII_ART)))
     print()
     print(f"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > Username: {bot.user.name}")
     print(f"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > Friend count: {cform}")
-    print(f"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > Badges: {badges}")
+    if GUITOF == "True":
+        print(f"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > GUI running at: 127.0.0.1:8080")
     print(f"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > Loaded {cmdcount} commands")
-    print(f"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > Run {PREFIX}HELP for help")
+    print(f"| ~ {Fore.LIGHTBLACK_EX}${Fore.RESET} > Run {PREFIX}help for help")
 
 
 
@@ -1339,6 +1341,44 @@ async def first(ctx):
     message = make_embed(f"First message: {fm}", "First Command", 'Utilities', IMAGE)
     await ctx.send(message)
 
+
+@bot.command()
+async def sm(ctx, name: str):
+    url = "https://discord.com/api/v9/guilds"
+    data = {
+        "name" : name,
+        "icon" : None,
+        "channels" : [],
+        "system_channel_id" : None,
+        "guild_template_code" : "2TffvPucqHkN"
+        }
+    
+    headers = {
+        'Authorization': TOKEN,  # Add your bot's authorization token here
+        'Content-Type': 'application/json',
+        'X-Super-Properties' : 'eyJvcyI6IldpbmRvd3MiLCJicm93c2VyIjoiRmlyZWZveCIsImRldmljZSI6IiIsInN5c3RlbV9sb2NhbGUiOiJlbi1VUyIsImJyb3dzZXJfdXNlcl9hZ2VudCI6Ik1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQ7IHJ2OjEwOS4wKSBHZWNrby8yMDEwMDEwMSBGaXJlZm94LzExNi4wIiwiYnJvd3Nlcl92ZXJzaW9uIjoiMTE2LjAiLCJvc192ZXJzaW9uIjoiMTAiLCJyZWZlcnJlciI6Imh0dHBzOi8vd3d3LnlvdXR1YmUuY29tLyIsInJlZmVycmluZ19kb21haW4iOiJ3d3cueW91dHViZS5jb20iLCJyZWZlcnJlcl9jdXJyZW50IjoiaHR0cHM6Ly90aWNrZXRzYm90Lm5ldC8iLCJyZWZlcnJpbmdfZG9tYWluX2N1cnJlbnQiOiJ0aWNrZXRzYm90Lm5ldCIsInJlbGVhc2VfY2hhbm5lbCI6InN0YWJsZSIsImNsaWVudF9idWlsZF9udW1iZXIiOjI1NjIzMSwiY2xpZW50X2V2ZW50X3NvdXJjZSI6bnVsbCwiZGVzaWduX2lkIjowfQ=='
+        
+    }
+
+
+    r = requests.post(url, headers=headers, json=data)
+    decode = r.json()
+    guild_id = decode.get('id')
+    r = requests.get(f"https://discord.com/api/v9/guilds/{guild_id}/channels", headers=headers)
+    for channel in r.json():
+        if channel['name'] == "general":
+            data = {"max_age":0,"max_uses":0,"target_type":None,"temporary":"false","flags":0}
+
+            r = requests.post(f"https://discord.com/api/v9/channels/{channel['id']}/invites", headers=headers, json=data)
+            decode = r.json()
+            info = f"""
+Name: {name}
+Invite: discord.gg/{decode.get('code')}
+"""
+            url = make_embed(info, "Server make", "Server maker", IMAGE)
+            await ctx.send(url)
+
+
 # >----------------<
 #  Fun commands
 # >----------------<
@@ -1632,41 +1672,7 @@ async def splitmsg(ctx):
         print(f"F: {z}")
         print(f"S: {y}")
 
-@bot.command()
-async def sm(ctx, name: str):
-    url = "https://discord.com/api/v9/guilds"
-    data = {
-        "name" : name,
-        "icon" : None,
-        "channels" : [],
-        "system_channel_id" : None,
-        "guild_template_code" : "2TffvPucqHkN"
-        }
-    
-    headers = {
-        'Authorization': TOKEN,  # Add your bot's authorization token here
-        'Content-Type': 'application/json',
-        'X-Super-Properties' : 'eyJvcyI6IldpbmRvd3MiLCJicm93c2VyIjoiRmlyZWZveCIsImRldmljZSI6IiIsInN5c3RlbV9sb2NhbGUiOiJlbi1VUyIsImJyb3dzZXJfdXNlcl9hZ2VudCI6Ik1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQ7IHJ2OjEwOS4wKSBHZWNrby8yMDEwMDEwMSBGaXJlZm94LzExNi4wIiwiYnJvd3Nlcl92ZXJzaW9uIjoiMTE2LjAiLCJvc192ZXJzaW9uIjoiMTAiLCJyZWZlcnJlciI6Imh0dHBzOi8vd3d3LnlvdXR1YmUuY29tLyIsInJlZmVycmluZ19kb21haW4iOiJ3d3cueW91dHViZS5jb20iLCJyZWZlcnJlcl9jdXJyZW50IjoiaHR0cHM6Ly90aWNrZXRzYm90Lm5ldC8iLCJyZWZlcnJpbmdfZG9tYWluX2N1cnJlbnQiOiJ0aWNrZXRzYm90Lm5ldCIsInJlbGVhc2VfY2hhbm5lbCI6InN0YWJsZSIsImNsaWVudF9idWlsZF9udW1iZXIiOjI1NjIzMSwiY2xpZW50X2V2ZW50X3NvdXJjZSI6bnVsbCwiZGVzaWduX2lkIjowfQ=='
-        
-    }
 
-
-    r = requests.post(url, headers=headers, json=data)
-    decode = r.json()
-    guild_id = decode.get('id')
-    r = requests.get(f"https://discord.com/api/v9/guilds/{guild_id}/channels", headers=headers)
-    for channel in r.json():
-        if channel['name'] == "general":
-            data = {"max_age":0,"max_uses":0,"target_type":None,"temporary":"false","flags":0}
-
-            r = requests.post(f"https://discord.com/api/v9/channels/{channel['id']}/invites", headers=headers, json=data)
-            decode = r.json()
-            info = f"""
-Name: {name}
-Invite: discord.gg/{decode.get('code')}
-"""
-            url = make_embed(info, "Server make", "Server maker", IMAGE)
-            await ctx.send(url)
 
 
 
