@@ -80,7 +80,7 @@ def decrypt_token(encrypted_token):
 
 def make_config():
     clears()
-    print(Colorate.Vertical(Colors.blue_to_purple, Center.XCenter(ASCII_ART_CONFIG)))
+    print(Colorate.Vertical(Colors.blue_to_purple, Center.XCenter(ASCII_ART_LOGIN)))
     token = input("| ~ > Token: ")
     prefix = input("| ~ > Prefix: ")
     ipapikey = input("| ~ > IP Api key (leave blank if you do not know): ")
