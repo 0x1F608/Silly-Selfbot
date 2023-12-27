@@ -13,6 +13,7 @@ import subprocess
 import socket
 import random
 import pygui as gui
+from cryptography.fernet import Fernet
 from json import dumps
 from winotify import Notification, audio
 from datetime import datetime
@@ -36,6 +37,28 @@ def restart_selfbot():
     print("Restarting...")
     exit()
 
+def pad_password(password):
+    if len(password) < 32:
+        needed = 32 - len(password)
+        password += "*" * needed
+    return password[:32]  
+
+def encrypt_token(token, password):
+    password = pad_password(password)
+    key = base64.urlsafe_b64encode(password.encode())
+    f = Fernet(key)
+    encrypted_data = f.encrypt(token.encode())
+    return encrypted_data
+
+def decrypt_token(encrypted_token):
+    pas = input("Password: ")
+    password = pad_password(pas)
+    key = base64.urlsafe_b64encode(password.encode())
+    f = Fernet(key)
+    decrypted_data = f.decrypt(encrypted_token)
+    return decrypted_data.decode()
+
+
 
 
 def make_config():
@@ -57,7 +80,20 @@ def make_config():
     sbd = input("| ~ > Selfbot detection [y/n] : ")
     if sbd.lower() == "y":
         sbd = "True"
+    et = input("| ~ > Encrypt Token [y/n] : ")
+    if et.lower() == "y":
+        et = "True"
+        passport = input("| ~ > Password: ")
+        token = encrypt_token(token, passport).decode()
+        print(token)
+    else:
+        et = "False"
+
+    
+
+
     afkm = input("| ~ > AFK message: ")
+
 
 
     data = {
@@ -71,7 +107,8 @@ def make_config():
             "SESSION-DETECTOR" : ssd,
             "SELFBOT-DETECTOR" : sbd
         },
-        "AFK-MESSAGE" : afkm
+        "AFK-MESSAGE" : afkm,
+        "ENCRYPT-TOKEN" : et
     }
 
 
@@ -240,6 +277,9 @@ def load_settings():
     with open('Settings/config.json', 'r') as f:
         config = json.load(f)
         TOKEN = config.get('TOKEN')
+        ET = config.get('ENCRYPT-TOKEN')
+        if ET == "True":
+            TOKEN = decrypt_token(TOKEN)
         PREFIX = config.get('PREFIX')
         IPAPI = config.get('IPLOOKUP-API-KEY')
         GIVEJOIN = config.get('SNIPERS').get('GIVEAWAY-JOINER')
@@ -538,6 +578,43 @@ def setup_ui():
     t = threading.Thread(target=window.run)
     t.daemon = True
     t.start()
+
+
+def logout_sess(sess_hash):
+    logout_url = "https://discord.com/api/v9/auth/sessions/logout"
+
+    finish_url = "https://discord.com/api/v9/mfa/finish"
+
+    logout_data = {"session_id_hashes":[sess_hash]}
+
+    log_r = requests.post(logout_url, headers=global_headers, json=logout_data)
+
+    logour_json = log_r.json()
+    
+    ticket = logour_json.get('mfa').get('ticket')
+
+
+
+    fin_data = {
+        'data' : "Password123'#",
+        'mfa_type' : "password",
+        'ticket' : ticket
+    }
+
+    fin_r = requests.post(finish_url, headers=global_headers, json=fin_data)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @bot.event
 async def on_ready():
