@@ -67,7 +67,7 @@ def encrypt_token(token, password):
 
 def decrypt_token(encrypted_token):
     clears()
-    print(Colorate.Vertical(Colors.blue_to_purple, Center.XCenter(ASCII_ART_LOGIN8)))
+    print(Colorate.Vertical(Colors.blue_to_purple, Center.XCenter(ASCII_ART_LOGIN)))
     pas = input("| ~ > Password: ")
     password = pad_password(pas)
     key = base64.urlsafe_b64encode(password.encode())
