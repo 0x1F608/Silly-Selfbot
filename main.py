@@ -67,7 +67,7 @@ def encrypt_token(token, password):
 
 def decrypt_token(encrypted_token):
     clears()
-    print(Colorate.Vertical(Colors.blue_to_purple, Center.XCenter(ASCII_ART_CONFIG)))
+    print(Colorate.Vertical(Colors.blue_to_purple, Center.XCenter(ASCII_ART_LOGIN8)))
     pas = input("| ~ > Password: ")
     password = pad_password(pas)
     key = base64.urlsafe_b64encode(password.encode())
@@ -80,7 +80,7 @@ def decrypt_token(encrypted_token):
 
 def make_config():
     clears()
-    print(Colorate.Vertical(Colors.blue_to_purple, Center.XCenter(ASCII_ART_LOGIN)))
+    print(Colorate.Vertical(Colors.blue_to_purple, Center.XCenter(ASCII_ART_CONFIG)))
     token = input("| ~ > Token: ")
     prefix = input("| ~ > Prefix: ")
     ipapikey = input("| ~ > IP Api key (leave blank if you do not know): ")
