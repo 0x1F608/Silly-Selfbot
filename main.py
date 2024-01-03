@@ -52,6 +52,29 @@ def restart_selfbot():
     print("Restarting...")
     exit()
 
+def animated_title():
+    tits = [
+        'Silly Selfbot - Built to raid',
+        'Silly Selfbot - Built to troll',
+        'Silly Selfbot - Better than the rest',
+        'Silly Selfbot - Making kids cry since 2023',
+        'Silly Selfbot - Best free selfbot',
+        'Silly Selfbot - Made with love by HannahHaven',
+        'Silly Selfbot - Please star my repo',
+        'Silly Selfbot - Spaghetti code'
+    ]
+
+    while True:
+        for tit in tits:
+            os.system(f"title {tit}")
+            time.sleep(1)
+
+HEADTHREAD = threading.Thread(target=animated_title)
+HEADTHREAD.daemon = True
+HEADTHREAD.start()
+
+
+
 def pad_password(password):
     if len(password) < 32:
         needed = 32 - len(password)
@@ -478,6 +501,7 @@ def make_box(content, section, title):
 
 SUS_WORDS = ['nighty', 'ethone', 'astolfo']
 PIPES = "||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||"
+AFK = "False"
 
 ASCII_ART= """
  ____  __  __    __    _  _    ____  ____  __    ____  ____   __  ____ 
@@ -592,7 +616,7 @@ async def on_ready():
     load_scripts()
     execute_scripts()
     clears()
-    title(f"Server count: {len(bot.guilds) - 2}")
+    #title(f"Server count: {len(bot.guilds) - 2}")
     cform = getfriends()
     cmdcount = get_commands_count()
     print(Colorate.Vertical(Colors.blue_to_purple, Center.XCenter(ASCII_ART)))
@@ -643,6 +667,12 @@ async def on_message(message: discord.Message):
     elif message.author.name in bot_names:
         if GJOIN == "True":
             givejoiner(message)
+
+    elif bot.user.mentioned_in(message):
+        if AFK == "True":
+            if "@everyone" not in message.content:
+                if message.author != bot.user:
+                    await message.reply(content=AFKM)
 
     else:
         await bot.process_commands(message)
@@ -743,9 +773,12 @@ async def utilities(ctx, page: int):
 {PREFIX}first ? Attempts to get the first message in a channel
 {PREFIX}swat [number] [@target] [address] ? Swat a user
 {PREFIX}clear ? Clear chat
+{PREFIX}selfdestruct [limit] ? Delete your messages
 """
     if page == 1:
         url = make_embed(page_1_help_content, "Utilities pg.1", "Utilities", IMAGE)
+    elif page == 2:
+        url = make_embed(page_2_help_content, "Utilities pg.1", "Utilities", IMAGE)
     await ctx.send(url)
 
 @bot.command()
@@ -782,6 +815,7 @@ async def account(ctx, page: int):
 {PREFIX}changebio [content] ? Change BIO
 {PREFIX}changeproniuns [new] ? Change pronouns
 {PREFIX}changestatus [status] ? Change your status
+{PREFIX}afk [on/off] ? Turn on or off afk mode
 """
     if page == 1:
         url = make_embed(page_1_help_content, "Account pg.1", "Account", IMAGE)
@@ -1418,6 +1452,14 @@ Invite: discord.gg/{decode.get('code')}
             await ctx.send(url)
 
 
+@bot.command()
+async def selfdestruct(ctx, limit: int):
+    async for message in ctx.channel.history(limit=limit):
+        if message.author.id == bot.user.id:
+            await message.delete()
+            time.sleep(1)
+
+
 # >----------------<
 #  Fun commands
 # >----------------<
@@ -1650,6 +1692,17 @@ async def block(ctx, id: int):
     url = f"https://discord.com/api/v9/users/@me/relationships/{id}"
     data = {'type' : 2}
     requests.put(url, headers=global_headers, json=data)
+
+@bot.command()
+async def afk(ctx, op):
+    global AFK
+    if op.lower() == "on":
+        AFK = "True"
+    elif op.lower() == "off":
+        AFK = "False"
+
+
+
 
 # >----------------<
 #   Test commands
