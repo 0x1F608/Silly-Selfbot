@@ -12,6 +12,7 @@ import websocket
 import subprocess
 import socket
 import random
+import string
 import pygui as gui
 from cryptography.fernet import Fernet
 from json import dumps
@@ -1105,6 +1106,16 @@ async def boardspam(ctx, userid: int, count: int, delay: float, torn: str, bid: 
         for i in range(count):
             send(delay, bid, i)
 
+
+@bot.command()
+async def chat_bypass(ctx, method : int, count : int):
+    if method == 1:
+        for i in range(count):
+            message = f"Wow ||| {random.choice(string.ascii_letters)}{random.choice(string.ascii_letters)}{random.choice(string.ascii_letters)}{random.choice(string.ascii_letters)}{random.randint(1, 10)}{random.choice(string.ascii_letters)}{random.choice(string.ascii_letters)}{random.choice(string.ascii_letters)}{random.choice(string.ascii_letters)}{random.choice(string.ascii_letters)}{random.randint(1, 10)}{random.choice(string.ascii_letters)}{random.randint(1, 10)}{random.choice(string.ascii_letters)}{random.choice(string.ascii_letters)}{random.randint(1, 10)}"           
+            await ctx.send(message)
+    elif method == 2:
+        things = "```Wow```" * count
+        await ctx.send(things)
 
 
 # >----------------<

@@ -1,0 +1,5 @@
+1. Run the install.bat file
+2. Run the open.bat file
+3. Fill out the info it asks you for
+4. Run your prefix then help to show commands
+5. To get more commands to your prefix then the section you want for example recon and the page, default page is 1 so .recon 1
