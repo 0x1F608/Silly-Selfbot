@@ -1118,6 +1118,10 @@ async def chat_bypass(ctx, method : int, count : int):
         await ctx.send(things)
 
 
+
+
+
+
 # >----------------<
 #  Recon commands
 # >----------------<

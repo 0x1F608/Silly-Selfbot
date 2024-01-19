@@ -8,3 +8,4 @@ pip install pystyle
 pip install websocket-client
 pip install flask
 pip install gevent
+pip install cryptography
