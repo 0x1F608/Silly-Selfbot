@@ -3,25 +3,26 @@ cls
 echo Starting installation...
 pip install requests >nul
 echo installed requests
-pip install discord
-pip uninstall discord
-pip install discord.py==1.7.3
+pip install discord >nul
+pip uninstall discord >nul
+pip install discord.py==1.7.3 >nul
 echo installed discord.py
-pip install winotify
-echo installed winotify
-pip install colorama
+pip install winotify >nul
+echo installed winotify 
+pip install colorama >nul
 echo installed colorama
-pip install pystyle
+pip install pystyle >nul
 echo installed pystyle
-pip install websocket-client
+pip install websocket-client >nul
 echo installed websocket-client
-pip install flask
+pip install flask >nul
 echo installed flask
-pip install gevent
+pip install gevent >nul
 echo installed gevent
-pip install cryptography
+pip install cryptography >nul
 echo installed cryptography
-
+echo.
+echo.
 echo Installation done!
 echo have fun using silly selfbot ;)
 pause
