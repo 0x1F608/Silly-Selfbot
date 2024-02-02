@@ -1505,17 +1505,17 @@ async def lyricslist(ctx):
 async def role_anim(ctx, laps: int, user: discord.Member):
     await ctx.message.delete()
     roles = []
-    role = await ctx.guild.create_role(name="Red | SillySec Anim Roles", colour=discord.Colour.red())
+    role = await ctx.guild.create_role(name="Red | Silly Anim Roles", colour=discord.Colour.red())
     roles.append(role)
-    role = await ctx.guild.create_role(name="Orange | SillySec Anim Roles", colour=discord.Colour.orange())
+    role = await ctx.guild.create_role(name="Orange | Silly Anim Roles", colour=discord.Colour.orange())
     roles.append(role)
-    role = await ctx.guild.create_role(name="Yellow | SillySec Anim Roles", colour=discord.Colour.gold())
+    role = await ctx.guild.create_role(name="Yellow | Silly Anim Roles", colour=discord.Colour.gold())
     roles.append(role)
-    role = await ctx.guild.create_role(name="Green | SillySec Anim Roles", colour=discord.Colour.green())
+    role = await ctx.guild.create_role(name="Green | Silly Anim Roles", colour=discord.Colour.green())
     roles.append(role)
-    role = await ctx.guild.create_role(name="Blue | SillySec Anim Roles", colour=discord.Colour.blue())
+    role = await ctx.guild.create_role(name="Blue | Silly Anim Roles", colour=discord.Colour.blue())
     roles.append(role)
-    role = await ctx.guild.create_role(name="Purple | SillySec Anim Roles", colour=discord.Colour.purple())
+    role = await ctx.guild.create_role(name="Purple | Silly Anim Roles", colour=discord.Colour.purple())
     roles.append(role)
 
     for i in range(laps):
